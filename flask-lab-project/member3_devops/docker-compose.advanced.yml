@@ -1,0 +1,287 @@
+# Advanced Docker Compose Configuration
+# Member 3 - DevOps Engineer
+
+version: '3.8'
+
+# ============================================
+# OPTION 1: Basic Single Service (Current)
+# ============================================
+
+services:
+  flask-app:
+    build:
+      context: ./main
+      dockerfile: Dockerfile
+    container_name: flask-lab-project
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_DEBUG=false
+      - PORT=5000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - flask-network
+
+# ============================================
+# OPTION 2: With Database (Uncomment to use)
+# ============================================
+
+#  postgres:
+#    image: postgres:15-alpine
+#    container_name: flask-postgres
+#    environment:
+#      POSTGRES_DB: flaskdb
+#      POSTGRES_USER: flaskuser
+#      POSTGRES_PASSWORD: flaskpass
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres-data:/var/lib/postgresql/data
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U flaskuser"]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#    networks:
+#      - flask-network
+#
+#  flask-app-with-db:
+#    build:
+#      context: ./main
+#      dockerfile: Dockerfile
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#    environment:
+#      - DATABASE_URL=postgresql://flaskuser:flaskpass@postgres:5432/flaskdb
+#    networks:
+#      - flask-network
+
+# ============================================
+# OPTION 3: With Redis Cache (Uncomment to use)
+# ============================================
+
+#  redis:
+#    image: redis:7-alpine
+#    container_name: flask-redis
+#    ports:
+#      - "6379:6379"
+#    healthcheck:
+#      test: ["CMD", "redis-cli", "ping"]
+#      interval: 10s
+#      timeout: 3s
+#      retries: 5
+#    networks:
+#      - flask-network
+
+# ============================================
+# OPTION 4: With Nginx Reverse Proxy
+# ============================================
+
+#  nginx:
+#    image: nginx:alpine
+#    container_name: flask-nginx
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+#      - ./ssl:/etc/nginx/ssl:ro
+#    depends_on:
+#      - flask-app
+#    networks:
+#      - flask-network
+
+# ============================================
+# OPTION 5: Development Setup with Hot Reload
+# ============================================
+
+#  flask-app-dev:
+#    build:
+#      context: ./main
+#      dockerfile: Dockerfile.dev
+#    volumes:
+#      - ./main:/app
+#    environment:
+#      - FLASK_DEBUG=1
+#      - FLASK_ENV=development
+#    ports:
+#      - "5000:5000"
+#    networks:
+#      - flask-network
+
+# ============================================
+# OPTION 6: With Monitoring Stack
+# ============================================
+
+#  prometheus:
+#    image: prom/prometheus:latest
+#    container_name: prometheus
+#    ports:
+#      - "9090:9090"
+#    volumes:
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#      - prometheus-data:/prometheus
+#    command:
+#      - '--config.file=/etc/prometheus/prometheus.yml'
+#      - '--storage.tsdb.path=/prometheus'
+#    networks:
+#      - flask-network
+#
+#  grafana:
+#    image: grafana/grafana:latest
+#    container_name: grafana
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      - GF_SECURITY_ADMIN_PASSWORD=admin
+#    volumes:
+#      - grafana-data:/var/lib/grafana
+#    depends_on:
+#      - prometheus
+#    networks:
+#      - flask-network
+
+# ============================================
+# OPTION 7: Complete Stack (All Services)
+# ============================================
+
+# Uncomment this section for a complete development stack
+# with database, cache, monitoring, and load balancing
+
+#services:
+#  # Application
+#  flask-app-1:
+#    build: ./main
+#    environment:
+#      - DATABASE_URL=postgresql://user:pass@postgres:5432/db
+#      - REDIS_URL=redis://redis:6379
+#    depends_on:
+#      - postgres
+#      - redis
+#    networks:
+#      - flask-network
+#
+#  flask-app-2:
+#    build: ./main
+#    environment:
+#      - DATABASE_URL=postgresql://user:pass@postgres:5432/db
+#      - REDIS_URL=redis://redis:6379
+#    depends_on:
+#      - postgres
+#      - redis
+#    networks:
+#      - flask-network
+#
+#  # Database
+#  postgres:
+#    image: postgres:15-alpine
+#    environment:
+#      POSTGRES_DB: db
+#      POSTGRES_USER: user
+#      POSTGRES_PASSWORD: pass
+#    volumes:
+#      - postgres-data:/var/lib/postgresql/data
+#    networks:
+#      - flask-network
+#
+#  # Cache
+#  redis:
+#    image: redis:7-alpine
+#    networks:
+#      - flask-network
+#
+#  # Load Balancer
+#  nginx:
+#    image: nginx:alpine
+#    ports:
+#      - "80:80"
+#    volumes:
+#      - ./nginx-lb.conf:/etc/nginx/nginx.conf:ro
+#    depends_on:
+#      - flask-app-1
+#      - flask-app-2
+#    networks:
+#      - flask-network
+#
+#  # Monitoring
+#  prometheus:
+#    image: prom/prometheus:latest
+#    ports:
+#      - "9090:9090"
+#    volumes:
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#      - prometheus-data:/prometheus
+#    networks:
+#      - flask-network
+#
+#  grafana:
+#    image: grafana/grafana:latest
+#    ports:
+#      - "3000:3000"
+#    environment:
+#      - GF_SECURITY_ADMIN_PASSWORD=admin
+#    volumes:
+#      - grafana-data:/var/lib/grafana
+#    depends_on:
+#      - prometheus
+#    networks:
+#      - flask-network
+
+# ============================================
+# Networks
+# ============================================
+
+networks:
+  flask-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+# ============================================
+# Volumes
+# ============================================
+
+volumes:
+  postgres-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+# ============================================
+# Usage Commands
+# ============================================
+#
+# Start services:
+#   docker-compose up -d
+#
+# View logs:
+#   docker-compose logs -f
+#
+# Stop services:
+#   docker-compose down
+#
+# Rebuild and start:
+#   docker-compose up -d --build
+#
+# Scale application:
+#   docker-compose up -d --scale flask-app=3
+#
+# Check status:
+#   docker-compose ps
+#
+# Execute command in container:
+#   docker-compose exec flask-app /bin/bash
+#
+# View resource usage:
+#   docker-compose top
