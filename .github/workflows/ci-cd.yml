@@ -30,17 +30,20 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd flask-lab-project || true
           cd main || true
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run tests with pytest
         run: |
+          cd flask-lab-project || true
           cd main || true
           pytest tests/ -v --cov=. --cov-report=term-missing
 
       - name: Test coverage report
         run: |
+          cd flask-lab-project || true
           cd main || true
           pytest tests/ --cov=. --cov-report=xml
 
@@ -63,6 +66,7 @@ jobs:
 
       - name: Test Docker image
         run: |
+          cd flask-lab-project || true
           cd main || true
           docker run -d -p 5000:5000 --name test-container flask-lab-project:latest
           sleep 10
