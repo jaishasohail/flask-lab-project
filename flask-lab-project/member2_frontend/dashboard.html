@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Flask Lab Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h2>🧪 Flask Lab</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/dashboard" class="active">Dashboard</a></li>
+                <li><a href="/api/info">API</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h3>Navigation</h3>
+            <ul class="sidebar-menu">
+                <li><a href="#overview" class="active">📊 Overview</a></li>
+                <li><a href="#messages">💬 Messages</a></li>
+                <li><a href="#users">👥 Users</a></li>
+                <li><a href="#analytics">📈 Analytics</a></li>
+                <li><a href="#settings">⚙️ Settings</a></li>
+            </ul>
+        </aside>
+
+        <main class="dashboard-main">
+            <!-- Overview Section -->
+            <section id="overview" class="dashboard-section">
+                <h1>Dashboard Overview</h1>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-content">
+                            <h3 id="total-messages">0</h3>
+                            <p>Total Messages</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3 id="total-users">0</h3>
+                            <p>Active Users</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">💚</div>
+                        <div class="stat-content">
+                            <h3 id="system-status">Active</h3>
+                            <p>System Status</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-content">
+                            <h3 id="uptime">99.9%</h3>
+                            <p>Uptime</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h2>Activity Overview</h2>
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Messages Section -->
+            <section id="messages" class="dashboard-section" style="display:none;">
+                <h1>Messages Management</h1>
+                
+                <div class="action-bar">
+                    <input type="text" id="searchInput" placeholder="Search messages..." class="search-input">
+                    <button class="btn btn-primary" onclick="openNewMessageModal()">
+                        ➕ New Message
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table id="messagesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Message</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messagesTableBody">
+                            <tr>
+                                <td colspan="5" class="empty-state">No messages yet. Create one to get started!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users" class="dashboard-section" style="display:none;">
+                <h1>User Management</h1>
+                
+                <div class="action-bar">
+                    <button class="btn btn-primary" onclick="openNewUserModal()">
+                        ➕ Add User
+                    </button>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="user-card">
+                        <div class="user-avatar">M1</div>
+                        <h3>Member 1</h3>
+                        <p class="user-role">Backend Lead</p>
+                        <span class="status-badge active">Active</span>
+                    </div>
+                    
+                    <div class="user-card">
+                        <div class="user-avatar">M2</div>
+                        <h3>Member 2</h3>
+                        <p class="user-role">Frontend Lead</p>
+                        <span class="status-badge active">Active</span>
+                    </div>
+                    
+                    <div class="user-card">
+                        <div class="user-avatar">M3</div>
+                        <h3>Member 3</h3>
+                        <p class="user-role">DevOps Engineer</p>
+                        <span class="status-badge active">Active</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section id="analytics" class="dashboard-section" style="display:none;">
+                <h1>Analytics & Reports</h1>
+                
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>Message Statistics</h3>
+                        <div class="stat-row">
+                            <span>Average Length:</span>
+                            <strong id="avg-length">0 words</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Total Words:</span>
+                            <strong id="total-words">0</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Longest Message:</span>
+                            <strong id="longest-msg">N/A</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3>API Performance</h3>
+                        <div class="stat-row">
+                            <span>Total Requests:</span>
+                            <strong id="total-requests">0</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Success Rate:</span>
+                            <strong id="success-rate">100%</strong>
+                        </div>
+                        <div class="stat-row">
+                            <span>Avg Response Time:</span>
+                            <strong id="response-time">45ms</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="dashboard-section" style="display:none;">
+                <h1>Settings</h1>
+                
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="appName">Application Name</label>
+                        <input type="text" id="appName" value="Flask Lab Project" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="apiEndpoint">API Endpoint</label>
+                        <input type="text" id="apiEndpoint" value="http://localhost:5000" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Theme</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="theme" value="light" checked>
+                                Light
+                            </label>
+                            <label>
+                                <input type="radio" name="theme" value="dark">
+                                Dark
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="notifications" checked>
+                            Enable Notifications
+                        </label>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveSettings()">
+                        💾 Save Settings
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for New Message -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('messageModal')">&times;</span>
+            <h2>Create New Message</h2>
+            <form id="newMessageForm">
+                <div class="form-group">
+                    <label for="msgName">Name</label>
+                    <input type="text" id="msgName" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="msgContent">Message</label>
+                    <textarea id="msgContent" required class="form-control" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="dashboard-footer">
+        <p>&copy; 2025 Flask Lab Project | Built with ❤️ by the team</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>
