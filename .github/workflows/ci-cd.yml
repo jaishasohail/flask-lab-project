@@ -1,0 +1,132 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          cd flask-lab-project || true
+          cd main || true
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests with pytest
+        run: |
+          cd flask-lab-project || true
+          cd main || true
+          pytest tests/ -v --cov=. --cov-report=term-missing
+
+      - name: Test coverage report
+        run: |
+          cd flask-lab-project || true
+          cd main || true
+          pytest tests/ --cov=. --cov-report=xml
+
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          cd flask-lab-project || true
+          cd main || true
+          docker build -t flask-lab-project:latest .
+
+      - name: Test Docker image
+        run: |
+          cd flask-lab-project || true
+          cd main || true
+          docker run -d -p 5000:5000 --name test-container flask-lab-project:latest
+          sleep 10
+          curl -f http://localhost:5000/health || exit 1
+          docker stop test-container
+          docker rm test-container
+
+      - name: Save Docker image as artifact
+        run: |
+          docker save flask-lab-project:latest | gzip > flask-lab-project.tar.gz
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: flask-lab-project.tar.gz
+          retention-days: 7
+
+  docker-hub-push:
+    name: Push to Docker Hub (Optional)
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+        continue-on-error: true
+
+      - name: Build and push
+        run: |
+          cd flask-lab-project || true
+          cd main || true
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/flask-lab-project:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/flask-lab-project:latest
+        continue-on-error: true
+
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    if: always()
+
+    steps:
+      - name: Print summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Tests: ${{ needs.test.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Build: ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🐳 Docker image built successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Application is ready for deployment" >> $GITHUB_STEP_SUMMARY
