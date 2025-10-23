@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Lab Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧪 Flask Lab Project</h1>
+            <p class="subtitle">Collaborative Application with CI/CD & Docker</p>
+        </header>
+
+        <main>
+            <section class="info-card">
+                <h2>Welcome to Our Flask Application</h2>
+                <p>This is a collaborative project built by a team of 3 developers:</p>
+                <ul>
+                    <li><strong>Member 1 (Backend Lead)</strong>: Core Flask routes and logic</li>
+                    <li><strong>Member 2 (Frontend/API Integration)</strong>: Templates and API endpoints</li>
+                    <li><strong>Member 3 (DevOps Engineer)</strong>: Docker and CI/CD pipeline</li>
+                </ul>
+            </section>
+
+            <section class="features">
+                <h2>✨ Features</h2>
+                <div class="feature-grid">
+                    <div class="feature">
+                        <h3>🏠 Homepage</h3>
+                        <p>User-friendly interface</p>
+                    </div>
+                    <div class="feature">
+                        <h3>💚 Health Check</h3>
+                        <p>Monitoring endpoint</p>
+                    </div>
+                    <div class="feature">
+                        <h3>📡 API Endpoints</h3>
+                        <p>RESTful data handling</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🐳 Dockerized</h3>
+                        <p>Container-ready deployment</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="api-section">
+                <h2>🔗 Available Endpoints</h2>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/</code> - Homepage
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/health</code> - Health check
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <code>/data</code> - Submit data
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <code>/api/info</code> - API information
+                </div>
+            </section>
+
+            <section class="test-section">
+                <h2>🧪 Test the API</h2>
+                <form id="dataForm">
+                    <input type="text" id="nameInput" placeholder="Enter your name" required>
+                    <textarea id="messageInput" placeholder="Enter a message" required></textarea>
+                    <button type="submit">Send Data</button>
+                </form>
+                <div id="response" class="response"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with Flask, Docker, and GitHub Actions</p>
+            <p>Version 1.0.0</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
